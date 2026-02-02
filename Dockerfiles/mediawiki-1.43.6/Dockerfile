@@ -8,4 +8,4 @@ RUN php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5
 RUN php composer-setup.php
 RUN php -r "unlink('composer-setup.php');"
 COPY composer.json /var/www/html/composer.json
-RUN php composer.phar update
+RUN php composer.phar update --no-dev
