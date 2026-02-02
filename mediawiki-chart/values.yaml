@@ -50,3 +50,5 @@ mariadb:
 localSettings:
   enabled: false
   content: ""
+  # Set to override the ConfigMap name (e.g. when using Kustomize configMapGenerator)
+  # configMapName: mediawiki-localsettings

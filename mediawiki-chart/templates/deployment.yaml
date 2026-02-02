@@ -13,10 +13,11 @@ spec:
       {{- include "mediawiki.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        configmap.reloader.stakater.com/reload: "mediawiki-localsettings"
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "mediawiki.selectorLabels" . | nindent 8 }}
         {{- include "mediawiki.networkpolicy" . | nindent 8 }}
@@ -55,5 +56,5 @@ spec:
       {{- if .Values.localSettings.enabled }}
       - name: localsettings
         configMap:
-          name: {{ include "mediawiki.fullname" . }}-localsettings
+          name: {{ .Values.localSettings.configMapName | default (printf "%s-localsettings" (include "mediawiki.fullname" .)) }}
       {{- end }}
