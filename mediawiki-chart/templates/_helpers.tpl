@@ -67,3 +67,30 @@ Network Policy label
 {{- define "mediawiki.networkpolicy" -}}
 mediawiki-db-network: "true"
 {{- end }}
+
+{{/*
+MariaDB fully qualified name
+*/}}
+{{- define "mediawiki.mariadb.fullname" -}}
+{{ include "mediawiki.fullname" . }}-mariadb
+{{- end }}
+
+{{/*
+MariaDB labels
+*/}}
+{{- define "mediawiki.mariadb.labels" -}}
+helm.sh/chart: {{ include "mediawiki.chart" . }}
+{{ include "mediawiki.mariadb.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+MariaDB selector labels
+*/}}
+{{- define "mediawiki.mariadb.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "mediawiki.name" . }}-mariadb
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

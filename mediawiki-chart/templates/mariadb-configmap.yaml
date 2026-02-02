@@ -1,0 +1,11 @@
+{{- if .Values.mariadb.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mediawiki.mariadb.fullname" . }}-cfmap
+  labels:
+    {{- include "mediawiki.mariadb.labels" . | nindent 4 }}
+data:
+  MYSQL_DATABASE: {{ .Values.mariadb.auth.database }}
+  MYSQL_USER: {{ .Values.mariadb.auth.user }}
+{{- end }}

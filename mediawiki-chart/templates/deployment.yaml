@@ -43,13 +43,17 @@ spec:
           volumeMounts:
           - mountPath: /var/www/html/images
             name: {{ .Chart.Name }}-data
-          #- mountPath: /var/www/html
-          #  name: {{ .Chart.Name }}-phplocalsettings
+          {{- if .Values.localSettings.enabled }}
+          - mountPath: /var/www/html/LocalSettings.php
+            name: localsettings
+            subPath: LocalSettings.php
+          {{- end }}
       volumes:
       - name: {{ .Chart.Name }}-data
         persistentVolumeClaim:
           claimName: {{ .Chart.Name }}-data
-      #- name: {{ .Chart.Name }}-phplocalsettings
-      #  hostpath:
-      #    path: /c/phplocalsettings/LocalSettings.php
-      #    type: file
+      {{- if .Values.localSettings.enabled }}
+      - name: localsettings
+        configMap:
+          name: {{ include "mediawiki.fullname" . }}-localsettings
+      {{- end }}

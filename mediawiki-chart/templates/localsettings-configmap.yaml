@@ -1,0 +1,11 @@
+{{- if .Values.localSettings.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mediawiki.fullname" . }}-localsettings
+  labels:
+    {{- include "mediawiki.labels" . | nindent 4 }}
+data:
+  LocalSettings.php: |
+    {{- .Values.localSettings.content | nindent 4 }}
+{{- end }}

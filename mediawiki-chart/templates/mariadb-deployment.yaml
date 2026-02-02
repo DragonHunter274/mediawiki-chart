@@ -1,0 +1,39 @@
+{{- if .Values.mariadb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mediawiki.mariadb.fullname" . }}
+  labels:
+    {{- include "mediawiki.mariadb.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "mediawiki.mariadb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mediawiki.mariadb.selectorLabels" . | nindent 8 }}
+        {{- include "mediawiki.networkpolicy" . | nindent 8 }}
+    spec:
+      containers:
+        - name: mariadb
+          image: "{{ .Values.mariadb.image.repository }}:{{ .Values.mariadb.image.tag }}"
+          imagePullPolicy: {{ .Values.mariadb.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "mediawiki.mariadb.fullname" . }}-secret
+            - configMapRef:
+                name: {{ include "mediawiki.mariadb.fullname" . }}-cfmap
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          volumeMounts:
+            - name: mariadb-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mariadb-data
+          persistentVolumeClaim:
+            claimName: {{ include "mediawiki.mariadb.fullname" . }}-data
+{{- end }}

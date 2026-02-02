@@ -1,0 +1,47 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "Dockerfiles/mediawiki-1.43.6/**"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: mediawiki
+  DOCKERFILE_PATH: Dockerfiles/mediawiki-1.43.6/Dockerfile
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tag
+        id: meta
+        run: |
+          OWNER="${{ github.repository_owner }}"
+          echo "owner=${OWNER,,}" >> "$GITHUB_OUTPUT"
+          echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: Dockerfiles/mediawiki-1.43.6
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: |
+            ghcr.io/${{ steps.meta.outputs.owner }}/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ steps.meta.outputs.owner }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.sha_short }}

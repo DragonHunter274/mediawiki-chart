@@ -1,0 +1,58 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: mediawiki
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://github.com/your-org/Mediawiki
+  ref:
+    branch: master
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mediawiki
+  namespace: mediawiki
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: ./mediawiki-chart
+      sourceRef:
+        kind: GitRepository
+        name: mediawiki
+        namespace: flux-system
+  valuesFrom:
+    - kind: Secret
+      name: mediawiki-db-credentials
+      valuesKey: rootPassword
+      targetPath: mariadb.auth.rootPassword
+    - kind: Secret
+      name: mediawiki-db-credentials
+      valuesKey: password
+      targetPath: mariadb.auth.password
+  values:
+    replicaCount: 2
+    image:
+      repository: dragonhunter274/mediawiki
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    service:
+      type: LoadBalancer
+      port: 8080
+      targetport: 8080
+    mariadb:
+      enabled: true
+      image:
+        repository: mariadb
+        tag: "latest"
+      auth:
+        database: mediawikidb
+        user: wikiuser
+      service:
+        type: ClusterIP
+        port: 3306
+      storage: 5Gi
+    localSettings:
+      enabled: false

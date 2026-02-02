@@ -8,24 +8,50 @@ Helm chart for mediawiki to deploy on kubernetes
 3.) kubectl
 
 versions installed on my machine . \
-kubernetes v1.19.3 \
-helm v3.5.2 \
-docker image > achandre/mediawiki
+kubernetes v1.28+ \
+helm v3.14+ \
+docker image > achandre/mediawiki (MediaWiki 1.43.6 LTS)
 
 # How to run 
 
-The repo conatines two charts . 
+The chart deploys both the MediaWiki application and a MariaDB database in a single install.
 
-1.) mediawiki-chart runs mediawiki app \
-2.) mediawiki-mariadb-chart runs database for mediawiki app.
+To deploy:
 
-To deploy, hop over to the chart and execute below command
+```
+helm install mediawiki ./mediawiki-chart
+```
 
-helm install chartname /directory
- 
-example > helm install mediawiki ./mediawiki-chart and helm install database ./mediawiki-mariadb-chart
- 
-The application will be served on the external ip provided by load balancer . In my case it was > http://localhost:8080. 
-The databse host will be available at database:3306. Set the db root password, username and db name from values file placed inside mediawiki-mariadb-chart . Use the same to configure mediawiki db details page .
+Configure database credentials in `mediawiki-chart/values.yaml` under the `mariadb` section before installing:
 
-At the end of configuartion , LocalSettings.php will be downloaded . The same file need to be placed at /var/www/html inside conatiner . This can be done by removing commented hostmount in deployment.yaml of mediawiki-chart and providing a hostmount path.
+```yaml
+mariadb:
+  auth:
+    rootPassword: your-root-password
+    password: your-user-password
+    database: mediawikidb
+    user: wikiuser
+```
+
+The application will be served on the external IP provided by the load balancer on port 8080.
+The database host will be available at `<release>-mediawiki-mariadb:3306` within the cluster.
+
+To disable the built-in MariaDB (e.g. to use an external database), set `mariadb.enabled: false`.
+
+## LocalSettings.php
+
+After initial setup, MediaWiki generates a `LocalSettings.php` file. You can provide it as a ConfigMap by adding it to your values:
+
+```yaml
+localSettings:
+  enabled: true
+  content: |
+    <?php
+    # Your LocalSettings.php content here
+```
+
+Alternatively, pass it at install time:
+
+```
+helm install mediawiki ./mediawiki-chart --set-file localSettings.content=LocalSettings.php --set localSettings.enabled=true
+```

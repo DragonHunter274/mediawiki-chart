@@ -30,3 +30,23 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
+
+mariadb:
+  enabled: true
+  image:
+    repository: mariadb
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  auth:
+    rootPassword: changeme
+    password: changeme
+    database: mediawikidb
+    user: wikiuser
+  service:
+    type: ClusterIP
+    port: 3306
+  storage: 5Gi
+
+localSettings:
+  enabled: false
+  content: ""
