@@ -1,6 +1,7 @@
 FROM mediawiki:1.43.6
 RUN apt-get update
 RUN apt-get install unzip zip wget
+RUN mkdir -p /var/www/mediawiki/extensions/
 RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/PluggableAuth.git /var/www/mediawiki/extensions/PluggableAuth
 RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/OpenIDConnect.git /var/www/mediawiki/extensions/OpenIDConnect
 RUN git clone --depth 1 https://github.com/StarCitizenTools/mediawiki-skins-Citizen.git /var/www/html/skins/Citizen
