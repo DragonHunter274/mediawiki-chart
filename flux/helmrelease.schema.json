@@ -62,7 +62,7 @@
           }
         },
         "values": {
-          "$ref": "https://raw.githubusercontent.com/dragonhunter274/Mediawiki/master/mediawiki-chart/values.schema.json"
+          "$ref": "https://raw.githubusercontent.com/dragonhunter274/mediawiki-chart/master/mediawiki-chart/values.schema.json"
         }
       }
     }
