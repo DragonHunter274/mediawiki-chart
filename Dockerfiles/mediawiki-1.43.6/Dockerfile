@@ -1,6 +1,6 @@
 FROM mediawiki:1.43.6
 RUN apt-get update
-RUN apt-get install unzip zip
+RUN apt-get install unzip zip wget
 RUN wget https://extdist.wmflabs.org/dist/extensions/PluggableAuth-REL1_43-a56d5f8.tar.gz && tar -xzf PluggableAuth-REL1_43-fa46796.tar.gz -C /var/www/mediawiki/extensions
 RUN wget https://extdist.wmflabs.org/dist/extensions/OpenIDConnect-REL1_43-3ac5fa1.tar.gz && tar -xzf OpenIDConnect-REL1_43-3ac5fa1.tar.gz -C /var/www/mediawiki/extensions
 RUN git clone --depth 1 https://github.com/StarCitizenTools/mediawiki-skins-Citizen.git /var/www/html/skins/Citizen
