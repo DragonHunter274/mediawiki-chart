@@ -35,8 +35,7 @@
         }
       },
       "required": [],
-      "title": "autoscaling",
-      "type": "object"
+      "title": "autoscaling"
     },
     "global": {
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
@@ -71,11 +70,8 @@
           "type": "string"
         }
       },
-      "required": [
-        "repository"
-      ],
-      "title": "image",
-      "type": "object"
+      "required": [],
+      "title": "image"
     },
     "ingress": {
       "additionalProperties": false,
@@ -143,8 +139,7 @@
         }
       },
       "required": [],
-      "title": "ingress",
-      "type": "object"
+      "title": "ingress"
     },
     "mariadb": {
       "additionalProperties": false,
@@ -182,11 +177,8 @@
               "type": "string"
             }
           },
-          "required": [
-            "repository"
-          ],
-          "title": "image",
-          "type": "object"
+          "required": [],
+          "title": "image"
         },
         "service": {
           "additionalProperties": false,
@@ -213,8 +205,7 @@
             }
           },
           "required": [],
-          "title": "service",
-          "type": "object"
+          "title": "service"
         },
         "storage": {
           "default": "5Gi",
@@ -224,12 +215,8 @@
           "type": "string"
         }
       },
-      "required": [
-        "image",
-        "service"
-      ],
-      "title": "mariadb",
-      "type": "object"
+      "required": [],
+      "title": "mariadb"
     },
     "mediawiki": {
       "additionalProperties": false,
@@ -291,14 +278,8 @@
               "type": "string"
             }
           },
-          "required": [
-            "name",
-            "user",
-            "password",
-            "rootPassword"
-          ],
-          "title": "db",
-          "type": "object"
+          "required": [],
+          "title": "db"
         },
         "defaultSkin": {
           "default": "citizen",
@@ -414,8 +395,7 @@
                 }
               },
               "required": [],
-              "title": "groupSync",
-              "type": "object"
+              "title": "groupSync"
             },
             "migrateUsersByEmail": {
               "default": false,
@@ -448,11 +428,8 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "groupSync"
-          ],
-          "title": "oidc",
-          "type": "object"
+          "required": [],
+          "title": "oidc"
         },
         "pingback": {
           "default": false,
@@ -499,16 +476,8 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "sitename",
-        "server",
-        "db",
-        "secretKey",
-        "upgradeKey",
-        "oidc"
-      ],
-      "title": "mediawiki",
-      "type": "object"
+      "required": [],
+      "title": "mediawiki"
     },
     "replicaCount": {
       "default": 2,
@@ -557,8 +526,7 @@
         }
       },
       "required": [],
-      "title": "service",
-      "type": "object"
+      "title": "service"
     },
     "serviceAccount": {
       "additionalProperties": false,
@@ -584,18 +552,9 @@
         }
       },
       "required": [],
-      "title": "serviceAccount",
-      "type": "object"
+      "title": "serviceAccount"
     }
   },
-  "required": [
-    "image",
-    "service",
-    "ingress",
-    "serviceAccount",
-    "autoscaling",
-    "mariadb",
-    "mediawiki"
-  ],
+  "required": [],
   "type": "object"
 }
