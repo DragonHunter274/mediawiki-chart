@@ -6,6 +6,6 @@ metadata:
   labels:
     {{- include "mediawiki.mariadb.labels" . | nindent 4 }}
 data:
-  MYSQL_DATABASE: {{ .Values.mariadb.auth.database }}
-  MYSQL_USER: {{ .Values.mariadb.auth.user }}
+  MYSQL_DATABASE: {{ .Values.mediawiki.db.name }}
+  MYSQL_USER: {{ .Values.mediawiki.db.user }}
 {{- end }}

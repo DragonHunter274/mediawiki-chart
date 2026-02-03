@@ -1,4 +1,3 @@
-{{- if .Values.localSettings.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,5 +6,116 @@ metadata:
     {{- include "mediawiki.labels" . | nindent 4 }}
 data:
   LocalSettings.php: |
-    {{- .Values.localSettings.content | nindent 4 }}
-{{- end }}
+    <?php
+    if ( !defined( 'MEDIAWIKI' ) ) {
+    	exit;
+    }
+
+    ## Site settings
+    $wgSitename = getenv('MW_SITENAME') ?: {{ .Values.mediawiki.sitename | quote }};
+    $wgScriptPath = {{ .Values.mediawiki.scriptPath | quote }};
+    $wgServer = getenv('MW_SERVER') ?: {{ .Values.mediawiki.server | quote }};
+    $wgResourceBasePath = $wgScriptPath;
+
+    $wgLogos = [
+    	'1x' => "$wgResourceBasePath/resources/assets/change-your-logo.svg",
+    	'icon' => "$wgResourceBasePath/resources/assets/change-your-logo.svg",
+    ];
+
+    ## Email
+    $wgEnableEmail = {{ .Values.mediawiki.enableEmail | ternary "true" "false" }};
+    $wgEnableUserEmail = {{ .Values.mediawiki.enableUserEmail | ternary "true" "false" }};
+    $wgEmergencyContact = "apache@localhost";
+    $wgPasswordSender = "apache@localhost";
+    $wgEnotifUserTalk = false;
+    $wgEnotifWatchlist = false;
+    $wgEmailAuthentication = true;
+
+    ## Database settings
+    $wgDBtype = {{ .Values.mediawiki.db.type | quote }};
+    $wgDBserver = getenv('MW_DB_SERVER') ?: {{ (.Values.mediawiki.db.server | default (include "mediawiki.mariadb.fullname" .)) | quote }};
+    $wgDBname = getenv('MW_DB_NAME') ?: {{ .Values.mediawiki.db.name | quote }};
+    $wgDBuser = getenv('MW_DB_USER') ?: {{ .Values.mediawiki.db.user | quote }};
+    $wgDBpassword = getenv('MW_DB_PASSWORD') ?: {{ .Values.mediawiki.db.password | quote }};
+    $wgDBprefix = {{ .Values.mediawiki.db.prefix | quote }};
+    $wgDBTableOptions = {{ .Values.mediawiki.db.tableOptions | quote }};
+    $wgSharedTables[] = "actor";
+
+    ## Cache
+    $wgMainCacheType = CACHE_NONE;
+    $wgMemCachedServers = [];
+
+    ## Uploads
+    $wgEnableUploads = {{ .Values.mediawiki.enableUploads | ternary "true" "false" }};
+    $wgUseInstantCommons = {{ .Values.mediawiki.useInstantCommons | ternary "true" "false" }};
+
+    ## Misc
+    $wgPingback = {{ .Values.mediawiki.pingback | ternary "true" "false" }};
+    $wgLanguageCode = {{ .Values.mediawiki.languageCode | quote }};
+    $wgLocaltimezone = {{ .Values.mediawiki.localtimezone | quote }};
+
+    ## Keys
+    $wgSecretKey = getenv('MW_SECRET_KEY') ?: {{ .Values.mediawiki.secretKey | quote }};
+    $wgAuthenticationTokenVersion = "1";
+    $wgUpgradeKey = getenv('MW_UPGRADE_KEY') ?: {{ .Values.mediawiki.upgradeKey | quote }};
+
+    ## Licensing
+    $wgRightsPage = "";
+    $wgRightsUrl = "https://creativecommons.org/licenses/by-sa/4.0/";
+    $wgRightsText = "Creative Commons Attribution-ShareAlike";
+    $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
+
+    ## Diff
+    $wgDiff3 = "/usr/bin/diff3";
+
+    ## Skin
+    $wgDefaultSkin = {{ .Values.mediawiki.defaultSkin | quote }};
+    wfLoadSkin( 'Vector' );
+    wfLoadSkin( 'MinervaNeue' );
+    wfLoadSkin( 'MonoBook' );
+    wfLoadSkin( 'Timeless' );
+    wfLoadSkin( 'Citizen' );
+
+    {{- if .Values.mediawiki.oidc.enabled }}
+
+    ## OpenID Connect
+    wfLoadExtension( 'PluggableAuth' );
+    wfLoadExtension( 'OpenIDConnect' );
+
+    $wgGroupPermissions['*']['autocreateaccount'] = true;
+    $wgPluggableAuth_EnableAutoLogin = {{ .Values.mediawiki.oidc.autoLogin | ternary "true" "false" }};
+    $wgPluggableAuth_EnableLocalLogin = {{ .Values.mediawiki.oidc.enableLocalLogin | ternary "true" "false" }};
+
+    $wgOpenIDConnect_UseEmailNameAsUserName = {{ .Values.mediawiki.oidc.useEmailAsUsername | ternary "true" "false" }};
+    $wgOpenIDConnect_MigrateUsersByEmail = {{ .Values.mediawiki.oidc.migrateUsersByEmail | ternary "true" "false" }};
+
+    $wgPluggableAuth_Config[] = [
+    	'plugin' => 'OpenIDConnect',
+    	'buttonLabelMessage' => {{ .Values.mediawiki.oidc.buttonLabel | quote }},
+    	'data' => [
+    		'providerURL' => getenv('MW_OIDC_PROVIDER_URL') ?: {{ .Values.mediawiki.oidc.providerURL | quote }},
+    		'clientID' => getenv('MW_OIDC_CLIENT_ID') ?: {{ .Values.mediawiki.oidc.clientID | quote }},
+    		'clientsecret' => getenv('MW_OIDC_CLIENT_SECRET') ?: {{ .Values.mediawiki.oidc.clientSecret | quote }},
+    		'scope' => explode(' ', {{ .Values.mediawiki.oidc.scope | quote }}),
+    		'preferred_username' => {{ .Values.mediawiki.oidc.preferredUsername | quote }},
+    	],
+    	{{- if .Values.mediawiki.oidc.groupSync.enabled }}
+    	'groupsyncs' => [
+    		[
+    			'type' => 'mapped',
+    			'map' => [
+    				{{- range $mwGroup, $oidcGroup := .Values.mediawiki.oidc.groupSync.map }}
+    				{{ $mwGroup | quote }} => [{{ $.Values.mediawiki.oidc.groupSync.claim | quote }} => {{ $oidcGroup | quote }}],
+    				{{- end }}
+    			]
+    		]
+    	],
+    	{{- end }}
+    ];
+    {{- end }}
+
+    {{- if .Values.mediawiki.extraSettings }}
+
+    ## Extra settings
+    {{ .Values.mediawiki.extraSettings | nindent 4 }}
+    {{- end }}

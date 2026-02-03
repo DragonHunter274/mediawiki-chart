@@ -5,10 +5,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  url: https://github.com/your-org/Mediawiki
+  url: https://github.com/dragonhunter274/Mediawiki
   ref:
     branch: master
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/dragonhunter274/Mediawiki/master/flux/helmrelease.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -25,13 +26,40 @@ spec:
         namespace: flux-system
   valuesFrom:
     - kind: Secret
-      name: mediawiki-db-credentials
-      valuesKey: rootPassword
-      targetPath: mariadb.auth.rootPassword
+      name: mediawiki-credentials
+      valuesKey: server
+      targetPath: mediawiki.server
     - kind: Secret
-      name: mediawiki-db-credentials
+      name: mediawiki-credentials
       valuesKey: password
-      targetPath: mariadb.auth.password
+      targetPath: mediawiki.db.password
+    - kind: Secret
+      name: mediawiki-credentials
+      valuesKey: rootPassword
+      targetPath: mediawiki.db.rootPassword
+    - kind: Secret
+      name: mediawiki-credentials
+      valuesKey: secretKey
+      targetPath: mediawiki.secretKey
+    - kind: Secret
+      name: mediawiki-credentials
+      valuesKey: upgradeKey
+      targetPath: mediawiki.upgradeKey
+    - kind: Secret
+      name: mediawiki-credentials
+      valuesKey: oidcProviderURL
+      targetPath: mediawiki.oidc.providerURL
+      optional: true
+    - kind: Secret
+      name: mediawiki-credentials
+      valuesKey: oidcClientID
+      targetPath: mediawiki.oidc.clientID
+      optional: true
+    - kind: Secret
+      name: mediawiki-credentials
+      valuesKey: oidcClientSecret
+      targetPath: mediawiki.oidc.clientSecret
+      optional: true
   values:
     replicaCount: 2
     image:
@@ -47,12 +75,36 @@ spec:
       image:
         repository: mariadb
         tag: "latest"
-      auth:
-        database: mediawikidb
-        user: wikiuser
       service:
         type: ClusterIP
         port: 3306
       storage: 5Gi
-    localSettings:
-      enabled: false
+    mediawiki:
+      sitename: "MyWiki"
+      scriptPath: ""
+      languageCode: "en"
+      localtimezone: "UTC"
+      defaultSkin: "citizen"
+      enableEmail: false
+      enableUserEmail: true
+      enableUploads: false
+      useInstantCommons: false
+      pingback: false
+      oidc:
+        enabled: false
+        autoLogin: false
+        enableLocalLogin: true
+        scope: "openid profile email"
+        buttonLabel: "Login with OIDC"
+        preferredUsername: "preferred_username"
+        migrateUsersByEmail: false
+        useEmailAsUsername: false
+        groupSync:
+          enabled: false
+          claim: "groups"
+          map: {}
+          # Example:
+          #   map:
+          #     sysop: "wiki-admins"
+          #     bureaucrat: "wiki-admins"
+      extraSettings: ""

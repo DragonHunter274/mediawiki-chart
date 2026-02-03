@@ -1,54 +1,405 @@
+# @schema
+# type: integer
+# minimum: 1
+# @schema
+# -- Number of MediaWiki pod replicas
 replicaCount: 2
 
 image:
+  # @schema
+  # type: string
+  # required: true
+  # @schema
+  # -- MediaWiki container image repository
   repository: achandre/mediawiki
+  # @schema
+  # enum: [Always, Never, IfNotPresent]
+  # @schema
+  # -- Image pull policy
   pullPolicy: IfNotPresent
+  # @schema
+  # type: string
+  # @schema
+  # -- Image tag (defaults to Chart.AppVersion)
   tag: "latest"
 
 service:
+  # @schema
+  # enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
+  # @schema
+  # -- Kubernetes service type
   type: LoadBalancer
+  # @schema
+  # type: integer
+  # minimum: 1
+  # maximum: 65535
+  # @schema
+  # -- Service port
   port: 8080
+  # @schema
+  # type: integer
+  # minimum: 1
+  # maximum: 65535
+  # @schema
+  # -- Container target port
   targetport: 8080
 
 ingress:
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Enable ingress resource
   enabled: false
+  # @schema
+  # type: string
+  # @schema
+  # -- Ingress class name (e.g. "nginx", "traefik")
+  ingressClassName: ""
+  # @schema
+  # type: object
+  # additionalProperties: true
+  # @schema
+  # -- Ingress annotations
   annotations: {}
+  # @schema
+  # type: array
+  # items:
+  #   type: object
+  #   properties:
+  #     host:
+  #       type: string
+  #     paths:
+  #       type: array
+  #       items:
+  #         type: object
+  #         properties:
+  #           path:
+  #             type: string
+  #           pathType:
+  #             enum: [Exact, Prefix, ImplementationSpecific]
+  # @schema
+  # -- Ingress host configuration
   hosts:
     - host: chart-example.local
-      paths: []
+      paths:
+        - path: /
+          pathType: Prefix
+  # @schema
+  # type: array
+  # @schema
+  # -- Ingress TLS configuration
   tls: []
 
+# @schema
+# type: object
+# additionalProperties: true
+# @schema
+# -- Pod resource requests and limits
 resources: {}
 
 serviceAccount:
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Create a dedicated service account
   create: false
+  # @schema
+  # type: object
+  # additionalProperties: true
+  # @schema
+  # -- Service account annotations
   annotations: {}
+  # @schema
+  # type: string
+  # @schema
+  # -- Service account name override
   name: ""
 
 autoscaling:
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Enable Horizontal Pod Autoscaler
   enabled: false
+  # @schema
+  # type: integer
+  # minimum: 1
+  # @schema
+  # -- Minimum number of replicas
   minReplicas: 1
+  # @schema
+  # type: integer
+  # minimum: 1
+  # @schema
+  # -- Maximum number of replicas
   maxReplicas: 100
+  # @schema
+  # type: integer
+  # minimum: 1
+  # maximum: 100
+  # @schema
+  # -- Target CPU utilization percentage for autoscaling
   targetCPUUtilizationPercentage: 80
 
 mariadb:
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Deploy a MariaDB instance alongside MediaWiki
   enabled: true
   image:
+    # @schema
+    # type: string
+    # required: true
+    # @schema
+    # -- MariaDB container image repository
     repository: mariadb
+    # @schema
+    # enum: [Always, Never, IfNotPresent]
+    # @schema
+    # -- Image pull policy
     pullPolicy: IfNotPresent
+    # @schema
+    # type: string
+    # @schema
+    # -- Image tag
     tag: "latest"
-  auth:
-    rootPassword: changeme
-    password: changeme
-    database: mediawikidb
-    user: wikiuser
   service:
+    # @schema
+    # enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
+    # @schema
+    # -- MariaDB service type
     type: ClusterIP
+    # @schema
+    # type: integer
+    # minimum: 1
+    # maximum: 65535
+    # @schema
+    # -- MariaDB service port
     port: 3306
+  # @schema
+  # type: string
+  # pattern: "^[0-9]+(\\.[0-9]+)?(Mi|Gi|Ti)$"
+  # @schema
+  # -- Persistent volume size for MariaDB data
   storage: 5Gi
 
-localSettings:
-  enabled: false
-  content: ""
-  # Set to override the ConfigMap name (e.g. when using Kustomize configMapGenerator)
-  # configMapName: mediawiki-localsettings
+mediawiki:
+  # @schema
+  # type: string
+  # required: true
+  # @schema
+  # -- Wiki site name displayed in the browser title and header
+  sitename: "MyWiki"
+  # @schema
+  # type: string
+  # required: true
+  # @schema
+  # -- Full URL of the wiki (protocol + hostname + port).
+  # Used for generating canonical URLs.
+  server: "http://localhost:8080"
+  # @schema
+  # type: string
+  # @schema
+  # -- URL base path to the wiki directory.
+  # Leave empty if MediaWiki is at the domain root.
+  scriptPath: ""
+  # @schema
+  # type: string
+  # @schema
+  # -- Wiki interface language code (e.g. "en", "de", "fr").
+  # Must match an entry in includes/languages/data/Names.php.
+  languageCode: "en"
+  # @schema
+  # type: string
+  # @schema
+  # -- PHP timezone identifier (e.g. "UTC", "Europe/Berlin")
+  localtimezone: "UTC"
+  # @schema
+  # enum: [vector, minerva, monobook, timeless, citizen]
+  # @schema
+  # -- Default skin. Available skins: vector, minerva, monobook, timeless, citizen.
+  defaultSkin: "citizen"
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Enable email features (notifications, password reset)
+  enableEmail: false
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Allow users to send email to each other
+  enableUserEmail: true
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Allow file uploads to the wiki
+  enableUploads: false
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Allow using images from Wikimedia Commons directly
+  useInstantCommons: false
+  # @schema
+  # type: boolean
+  # @schema
+  # -- Send anonymous usage data to the Wikimedia Foundation
+  pingback: false
+
+  db:
+    # @schema
+    # enum: [mysql, postgres, sqlite]
+    # @schema
+    # -- Database type. Supported: "mysql", "postgres", "sqlite"
+    type: "mysql"
+    # @schema
+    # type: string
+    # @schema
+    # -- Database server hostname.
+    # Defaults to the bundled MariaDB service name when left empty.
+    # Override when using an external database.
+    server: ""
+    # @schema
+    # type: string
+    # required: true
+    # @schema
+    # -- Database name
+    name: "mediawiki"
+    # @schema
+    # type: string
+    # required: true
+    # @schema
+    # -- Database user
+    user: "wikiuser"
+    # @schema
+    # type: string
+    # required: true
+    # @schema
+    # -- Database user password. Injected as MW_DB_PASSWORD env var.
+    password: "changeme"
+    # @schema
+    # type: string
+    # required: true
+    # @schema
+    # -- MariaDB root password (used by the MariaDB container only)
+    rootPassword: "changeme"
+    # @schema
+    # type: string
+    # @schema
+    # -- Table name prefix (useful for shared databases)
+    prefix: ""
+    # @schema
+    # type: string
+    # @schema
+    # -- MySQL/MariaDB table engine and charset options
+    tableOptions: "ENGINE=InnoDB, DEFAULT CHARSET=binary"
+
+  # @schema
+  # type: string
+  # required: true
+  # minLength: 1
+  # @schema
+  # -- MediaWiki secret key for session signing and HMAC tokens.
+  # Generate with: openssl rand -hex 32
+  secretKey: "CHANGE_ME_TO_A_64_CHAR_HEX_STRING"
+  # @schema
+  # type: string
+  # required: true
+  # minLength: 1
+  # @schema
+  # -- Upgrade key to enable the web installer when LocalSettings.php exists.
+  # Generate with: openssl rand -hex 16
+  upgradeKey: "CHANGE_ME"
+
+  oidc:
+    # @schema
+    # type: boolean
+    # @schema
+    # -- Enable OpenID Connect authentication via PluggableAuth + OpenIDConnect extensions
+    enabled: false
+    # @schema
+    # type: boolean
+    # @schema
+    # -- Automatically redirect unauthenticated users to the OIDC provider.
+    # When false, users see the normal login page with an OIDC button.
+    autoLogin: false
+    # @schema
+    # type: boolean
+    # @schema
+    # -- Allow local MediaWiki account login alongside OIDC
+    enableLocalLogin: true
+    # @schema
+    # type: string
+    # @schema
+    # -- OIDC provider discovery URL (e.g. "https://keycloak.example.com/realms/myrealm")
+    providerURL: ""
+    # @schema
+    # type: string
+    # @schema
+    # -- OIDC client ID registered with the provider
+    clientID: ""
+    # @schema
+    # type: string
+    # @schema
+    # -- OIDC client secret. Injected as MW_OIDC_CLIENT_SECRET env var.
+    clientSecret: ""
+    # @schema
+    # type: string
+    # @schema
+    # -- OIDC scopes to request (space-separated)
+    scope: "openid profile email"
+    # @schema
+    # type: string
+    # @schema
+    # -- Label shown on the OIDC login button
+    buttonLabel: "Login with OIDC"
+    # @schema
+    # type: string
+    # @schema
+    # -- OIDC claim to use as MediaWiki username
+    preferredUsername: "preferred_username"
+    # @schema
+    # type: boolean
+    # @schema
+    # -- Migrate existing local accounts to OIDC by matching email address
+    migrateUsersByEmail: false
+    # @schema
+    # type: boolean
+    # @schema
+    # -- Use the email address from the OIDC claim as the MediaWiki username
+    useEmailAsUsername: false
+    groupSync:
+      # @schema
+      # type: boolean
+      # @schema
+      # -- Enable mapping OIDC groups/roles to MediaWiki user groups
+      enabled: false
+      # @schema
+      # type: string
+      # @schema
+      # -- OIDC claim name that contains the group/role list
+      claim: "groups"
+      # @schema
+      # type: object
+      # additionalProperties:
+      #   type: string
+      # @schema
+      # -- Mapping of MediaWiki group to OIDC group value.
+      # Each key is a MediaWiki group name, value is the matching OIDC group.
+      # Example:
+      #   map:
+      #     sysop: "wiki-admins"
+      #     bureaucrat: "wiki-admins"
+      #     editor: "wiki-editors"
+      map: {}
+
+  # @schema
+  # type: string
+  # @schema
+  # -- Freeform PHP appended at the end of LocalSettings.php.
+  # Use this for extensions or settings not covered by the template.
+  # Example:
+  #   extraSettings: |
+  #     wfLoadExtension( 'Cite' );
+  #     $wgGroupPermissions['*']['edit'] = false;
+  extraSettings: ""

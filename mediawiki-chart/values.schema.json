@@ -1,0 +1,601 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "autoscaling": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable Horizontal Pod Autoscaler",
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "maxReplicas": {
+          "default": 100,
+          "description": "Maximum number of replicas",
+          "minimum": 1,
+          "title": "maxReplicas",
+          "type": "integer"
+        },
+        "minReplicas": {
+          "default": 1,
+          "description": "Minimum number of replicas",
+          "minimum": 1,
+          "title": "minReplicas",
+          "type": "integer"
+        },
+        "targetCPUUtilizationPercentage": {
+          "default": 80,
+          "description": "Target CPU utilization percentage for autoscaling",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "targetCPUUtilizationPercentage",
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "title": "autoscaling",
+      "type": "object"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "image": {
+      "additionalProperties": false,
+      "properties": {
+        "pullPolicy": {
+          "default": "IfNotPresent",
+          "description": "Image pull policy",
+          "enum": [
+            "Always",
+            "Never",
+            "IfNotPresent"
+          ],
+          "required": [],
+          "title": "pullPolicy"
+        },
+        "repository": {
+          "default": "achandre/mediawiki",
+          "description": "MediaWiki container image repository",
+          "title": "repository",
+          "type": "string"
+        },
+        "tag": {
+          "default": "latest",
+          "description": "Image tag (defaults to Chart.AppVersion)",
+          "title": "tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository"
+      ],
+      "title": "image",
+      "type": "object"
+    },
+    "ingress": {
+      "additionalProperties": false,
+      "properties": {
+        "annotations": {
+          "additionalProperties": true,
+          "description": "Ingress annotations",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Enable ingress resource",
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "hosts": {
+          "description": "Ingress host configuration",
+          "items": {
+            "properties": {
+              "host": {
+                "type": "string"
+              },
+              "paths": {
+                "items": {
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "pathType": {
+                      "enum": [
+                        "Exact",
+                        "Prefix",
+                        "ImplementationSpecific"
+                      ],
+                      "required": []
+                    }
+                  },
+                  "required": [],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [],
+            "type": "object"
+          },
+          "title": "hosts",
+          "type": "array"
+        },
+        "ingressClassName": {
+          "default": "",
+          "description": "Ingress class name (e.g. \"nginx\", \"traefik\")",
+          "title": "ingressClassName",
+          "type": "string"
+        },
+        "tls": {
+          "description": "Ingress TLS configuration",
+          "items": {
+            "required": []
+          },
+          "title": "tls",
+          "type": "array"
+        }
+      },
+      "required": [],
+      "title": "ingress",
+      "type": "object"
+    },
+    "mariadb": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Deploy a MariaDB instance alongside MediaWiki",
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "image": {
+          "additionalProperties": false,
+          "properties": {
+            "pullPolicy": {
+              "default": "IfNotPresent",
+              "description": "Image pull policy",
+              "enum": [
+                "Always",
+                "Never",
+                "IfNotPresent"
+              ],
+              "required": [],
+              "title": "pullPolicy"
+            },
+            "repository": {
+              "default": "mariadb",
+              "description": "MariaDB container image repository",
+              "title": "repository",
+              "type": "string"
+            },
+            "tag": {
+              "default": "latest",
+              "description": "Image tag",
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repository"
+          ],
+          "title": "image",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": false,
+          "properties": {
+            "port": {
+              "default": 3306,
+              "description": "MariaDB service port",
+              "maximum": 65535,
+              "minimum": 1,
+              "title": "port",
+              "type": "integer"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "description": "MariaDB service type",
+              "enum": [
+                "ClusterIP",
+                "NodePort",
+                "LoadBalancer",
+                "ExternalName"
+              ],
+              "required": [],
+              "title": "type"
+            }
+          },
+          "required": [],
+          "title": "service",
+          "type": "object"
+        },
+        "storage": {
+          "default": "5Gi",
+          "description": "Persistent volume size for MariaDB data",
+          "pattern": "^[0-9]+(\\.[0-9]+)?(Mi|Gi|Ti)$",
+          "title": "storage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "image",
+        "service"
+      ],
+      "title": "mariadb",
+      "type": "object"
+    },
+    "mediawiki": {
+      "additionalProperties": false,
+      "properties": {
+        "db": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "default": "mediawiki",
+              "description": "Database name",
+              "title": "name",
+              "type": "string"
+            },
+            "password": {
+              "default": "changeme",
+              "description": "Database user password. Injected as MW_DB_PASSWORD env var.",
+              "title": "password",
+              "type": "string"
+            },
+            "prefix": {
+              "default": "",
+              "description": "Table name prefix (useful for shared databases)",
+              "title": "prefix",
+              "type": "string"
+            },
+            "rootPassword": {
+              "default": "changeme",
+              "description": "MariaDB root password (used by the MariaDB container only)",
+              "title": "rootPassword",
+              "type": "string"
+            },
+            "server": {
+              "default": "",
+              "description": "Database server hostname.\nDefaults to the bundled MariaDB service name when left empty.\nOverride when using an external database.",
+              "title": "server",
+              "type": "string"
+            },
+            "tableOptions": {
+              "default": "ENGINE=InnoDB, DEFAULT CHARSET=binary",
+              "description": "MySQL/MariaDB table engine and charset options",
+              "title": "tableOptions",
+              "type": "string"
+            },
+            "type": {
+              "default": "mysql",
+              "description": "Database type. Supported: \"mysql\", \"postgres\", \"sqlite\"",
+              "enum": [
+                "mysql",
+                "postgres",
+                "sqlite"
+              ],
+              "required": [],
+              "title": "type"
+            },
+            "user": {
+              "default": "wikiuser",
+              "description": "Database user",
+              "title": "user",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "user",
+            "password",
+            "rootPassword"
+          ],
+          "title": "db",
+          "type": "object"
+        },
+        "defaultSkin": {
+          "default": "citizen",
+          "description": "Default skin. Available skins: vector, minerva, monobook, timeless, citizen.",
+          "enum": [
+            "vector",
+            "minerva",
+            "monobook",
+            "timeless",
+            "citizen"
+          ],
+          "required": [],
+          "title": "defaultSkin"
+        },
+        "enableEmail": {
+          "default": false,
+          "description": "Enable email features (notifications, password reset)",
+          "title": "enableEmail",
+          "type": "boolean"
+        },
+        "enableUploads": {
+          "default": false,
+          "description": "Allow file uploads to the wiki",
+          "title": "enableUploads",
+          "type": "boolean"
+        },
+        "enableUserEmail": {
+          "default": true,
+          "description": "Allow users to send email to each other",
+          "title": "enableUserEmail",
+          "type": "boolean"
+        },
+        "extraSettings": {
+          "default": "",
+          "description": "Freeform PHP appended at the end of LocalSettings.php.\nUse this for extensions or settings not covered by the template.\nExample:\n  extraSettings: |\n    wfLoadExtension( 'Cite' );\n    $wgGroupPermissions['*']['edit'] = false;",
+          "title": "extraSettings",
+          "type": "string"
+        },
+        "languageCode": {
+          "default": "en",
+          "description": "Wiki interface language code (e.g. \"en\", \"de\", \"fr\").\nMust match an entry in includes/languages/data/Names.php.",
+          "title": "languageCode",
+          "type": "string"
+        },
+        "localtimezone": {
+          "default": "UTC",
+          "description": "PHP timezone identifier (e.g. \"UTC\", \"Europe/Berlin\")",
+          "title": "localtimezone",
+          "type": "string"
+        },
+        "oidc": {
+          "additionalProperties": false,
+          "properties": {
+            "autoLogin": {
+              "default": false,
+              "description": "Automatically redirect unauthenticated users to the OIDC provider.\nWhen false, users see the normal login page with an OIDC button.",
+              "title": "autoLogin",
+              "type": "boolean"
+            },
+            "buttonLabel": {
+              "default": "Login with OIDC",
+              "description": "Label shown on the OIDC login button",
+              "title": "buttonLabel",
+              "type": "string"
+            },
+            "clientID": {
+              "default": "",
+              "description": "OIDC client ID registered with the provider",
+              "title": "clientID",
+              "type": "string"
+            },
+            "clientSecret": {
+              "default": "",
+              "description": "OIDC client secret. Injected as MW_OIDC_CLIENT_SECRET env var.",
+              "title": "clientSecret",
+              "type": "string"
+            },
+            "enableLocalLogin": {
+              "default": true,
+              "description": "Allow local MediaWiki account login alongside OIDC",
+              "title": "enableLocalLogin",
+              "type": "boolean"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Enable OpenID Connect authentication via PluggableAuth + OpenIDConnect extensions",
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "groupSync": {
+              "additionalProperties": false,
+              "properties": {
+                "claim": {
+                  "default": "groups",
+                  "description": "OIDC claim name that contains the group/role list",
+                  "title": "claim",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable mapping OIDC groups/roles to MediaWiki user groups",
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "map": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Mapping of MediaWiki group to OIDC group value.\nEach key is a MediaWiki group name, value is the matching OIDC group.\nExample:\n  map:\n    sysop: \"wiki-admins\"\n    bureaucrat: \"wiki-admins\"\n    editor: \"wiki-editors\"",
+                  "required": [],
+                  "title": "map",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "groupSync",
+              "type": "object"
+            },
+            "migrateUsersByEmail": {
+              "default": false,
+              "description": "Migrate existing local accounts to OIDC by matching email address",
+              "title": "migrateUsersByEmail",
+              "type": "boolean"
+            },
+            "preferredUsername": {
+              "default": "preferred_username",
+              "description": "OIDC claim to use as MediaWiki username",
+              "title": "preferredUsername",
+              "type": "string"
+            },
+            "providerURL": {
+              "default": "",
+              "description": "OIDC provider discovery URL (e.g. \"https://keycloak.example.com/realms/myrealm\")",
+              "title": "providerURL",
+              "type": "string"
+            },
+            "scope": {
+              "default": "openid profile email",
+              "description": "OIDC scopes to request (space-separated)",
+              "title": "scope",
+              "type": "string"
+            },
+            "useEmailAsUsername": {
+              "default": false,
+              "description": "Use the email address from the OIDC claim as the MediaWiki username",
+              "title": "useEmailAsUsername",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "groupSync"
+          ],
+          "title": "oidc",
+          "type": "object"
+        },
+        "pingback": {
+          "default": false,
+          "description": "Send anonymous usage data to the Wikimedia Foundation",
+          "title": "pingback",
+          "type": "boolean"
+        },
+        "scriptPath": {
+          "default": "",
+          "description": "URL base path to the wiki directory.\nLeave empty if MediaWiki is at the domain root.",
+          "title": "scriptPath",
+          "type": "string"
+        },
+        "secretKey": {
+          "default": "CHANGE_ME_TO_A_64_CHAR_HEX_STRING",
+          "description": "MediaWiki secret key for session signing and HMAC tokens.\nGenerate with: openssl rand -hex 32",
+          "minLength": 1,
+          "title": "secretKey",
+          "type": "string"
+        },
+        "server": {
+          "default": "http://localhost:8080",
+          "description": "Full URL of the wiki (protocol + hostname + port).\nUsed for generating canonical URLs.",
+          "title": "server",
+          "type": "string"
+        },
+        "sitename": {
+          "default": "MyWiki",
+          "description": "Wiki site name displayed in the browser title and header",
+          "title": "sitename",
+          "type": "string"
+        },
+        "upgradeKey": {
+          "default": "CHANGE_ME",
+          "description": "Upgrade key to enable the web installer when LocalSettings.php exists.\nGenerate with: openssl rand -hex 16",
+          "minLength": 1,
+          "title": "upgradeKey",
+          "type": "string"
+        },
+        "useInstantCommons": {
+          "default": false,
+          "description": "Allow using images from Wikimedia Commons directly",
+          "title": "useInstantCommons",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "sitename",
+        "server",
+        "db",
+        "secretKey",
+        "upgradeKey",
+        "oidc"
+      ],
+      "title": "mediawiki",
+      "type": "object"
+    },
+    "replicaCount": {
+      "default": 2,
+      "description": "Number of MediaWiki pod replicas",
+      "minimum": 1,
+      "title": "replicaCount",
+      "type": "integer"
+    },
+    "resources": {
+      "additionalProperties": true,
+      "description": "Pod resource requests and limits",
+      "required": [],
+      "title": "resources",
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "properties": {
+        "port": {
+          "default": 8080,
+          "description": "Service port",
+          "maximum": 65535,
+          "minimum": 1,
+          "title": "port",
+          "type": "integer"
+        },
+        "targetport": {
+          "default": 8080,
+          "description": "Container target port",
+          "maximum": 65535,
+          "minimum": 1,
+          "title": "targetport",
+          "type": "integer"
+        },
+        "type": {
+          "default": "LoadBalancer",
+          "description": "Kubernetes service type",
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer",
+            "ExternalName"
+          ],
+          "required": [],
+          "title": "type"
+        }
+      },
+      "required": [],
+      "title": "service",
+      "type": "object"
+    },
+    "serviceAccount": {
+      "additionalProperties": false,
+      "properties": {
+        "annotations": {
+          "additionalProperties": true,
+          "description": "Service account annotations",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "create": {
+          "default": false,
+          "description": "Create a dedicated service account",
+          "title": "create",
+          "type": "boolean"
+        },
+        "name": {
+          "default": "",
+          "description": "Service account name override",
+          "title": "name",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "title": "serviceAccount",
+      "type": "object"
+    }
+  },
+  "required": [
+    "image",
+    "service",
+    "ingress",
+    "serviceAccount",
+    "autoscaling",
+    "mariadb",
+    "mediawiki"
+  ],
+  "type": "object"
+}

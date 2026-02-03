@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       annotations:
-        configmap.reloader.stakater.com/reload: "mediawiki-localsettings"
+        configmap.reloader.stakater.com/reload: {{ printf "%s-localsettings" (include "mediawiki.fullname" .) | quote }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -39,22 +39,21 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          envFrom:
+          - secretRef:
+              name: {{ include "mediawiki.fullname" . }}-secret
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
           - mountPath: /var/www/html/images
             name: {{ .Chart.Name }}-data
-          {{- if .Values.localSettings.enabled }}
           - mountPath: /var/www/html/LocalSettings.php
             name: localsettings
             subPath: LocalSettings.php
-          {{- end }}
       volumes:
       - name: {{ .Chart.Name }}-data
         persistentVolumeClaim:
           claimName: {{ .Chart.Name }}-data
-      {{- if .Values.localSettings.enabled }}
       - name: localsettings
         configMap:
-          name: {{ .Values.localSettings.configMapName | default (printf "%s-localsettings" (include "mediawiki.fullname" .)) }}
-      {{- end }}
+          name: {{ include "mediawiki.fullname" . }}-localsettings
