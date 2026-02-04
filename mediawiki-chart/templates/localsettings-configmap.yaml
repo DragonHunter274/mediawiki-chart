@@ -114,6 +114,9 @@ data:
     ];
     {{- end }}
 
+    ## Widgets
+    wfLoadExtension( 'Widgets' );
+
     {{- if .Values.mediawiki.extraSettings }}
 
     ## Extra settings
