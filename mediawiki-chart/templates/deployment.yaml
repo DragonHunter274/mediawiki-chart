@@ -46,44 +46,37 @@ spec:
             set -e
             DB_HOST="{{ .Values.mediawiki.db.server | default (include "mediawiki.mariadb.fullname" .) }}"
             DB_PORT=3306
+            DB_NAME="{{ .Values.mediawiki.db.name }}"
+            DB_USER="${MW_DB_USER:-{{ .Values.mediawiki.db.user }}}"
+            DB_PASS="${MW_DB_PASSWORD:-{{ .Values.mediawiki.db.password }}}"
+
             echo "Waiting for database at $DB_HOST:$DB_PORT..."
-            # Wait for TCP connection to be available
             until timeout 1 bash -c "cat < /dev/null > /dev/tcp/$DB_HOST/$DB_PORT" 2>/dev/null; do
               echo "Database not ready, retrying in 5s..."
               sleep 5
             done
             echo "Database TCP port is open."
 
-            # Try to connect and check if tables exist using MediaWiki's PHP with proper autoloading
             cd /var/www/html
-            TABLE_EXISTS=$(php -r '
-              require_once "includes/WebStart.php";
-              $dbr = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-              try {
-                $dbr->selectField( "page", "1", "", __METHOD__ );
-                echo "1";
-              } catch (Exception $e) {
-                echo "0";
-              }
-            ' 2>/dev/null || echo "0")
 
-            if [ "$TABLE_EXISTS" -eq 0 ]; then
+            # Check if page table exists by attempting to describe it
+            if mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "DESCRIBE page;" >/dev/null 2>&1; then
+              echo "Tables found. Running MediaWiki update..."
+              php /var/www/html/maintenance/run.php update --quick
+            else
               echo "No tables found. Running MediaWiki install..."
               php /var/www/html/maintenance/run.php install \
                 --dbserver "$DB_HOST" \
-                --dbname "{{ .Values.mediawiki.db.name }}" \
-                --dbuser "$(printenv MW_DB_USER || echo '{{ .Values.mediawiki.db.user }}')" \
-                --dbpass "$(printenv MW_DB_PASSWORD || echo '{{ .Values.mediawiki.db.password }}')" \
+                --dbname "$DB_NAME" \
+                --dbuser "$DB_USER" \
+                --dbpass "$DB_PASS" \
                 --scriptpath "{{ .Values.mediawiki.scriptPath }}" \
                 --lang "{{ .Values.mediawiki.languageCode }}" \
                 --pass "$(openssl rand -base64 32)" \
                 "{{ .Values.mediawiki.sitename }}" "Admin"
               echo "Install complete."
-            else
-              echo "Tables found. Running MediaWiki update..."
             fi
-            php /var/www/html/maintenance/run.php update --quick
-            echo "Database is up to date."
+            echo "Database initialization complete."
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
