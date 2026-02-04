@@ -29,6 +29,52 @@ spec:
       serviceAccountName: {{ include "mediawiki.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: mediawiki-db-init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          envFrom:
+          - secretRef:
+              name: {{ include "mediawiki.fullname" . }}-secret
+          volumeMounts:
+          - mountPath: /var/www/html/LocalSettings.php
+            name: localsettings
+            subPath: LocalSettings.php
+          command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            DB_HOST="{{ .Values.mediawiki.db.server | default (include "mediawiki.mariadb.fullname" .) }}"
+            DB_PORT=3306
+            echo "Waiting for database at $DB_HOST:$DB_PORT..."
+            until php -r "new PDO('mysql:host='.'$DB_HOST'.';port=$DB_PORT', getenv('MW_DB_USER') ?: '{{ .Values.mediawiki.db.user }}', getenv('MW_DB_PASSWORD') ?: '{{ .Values.mediawiki.db.password }}');" 2>/dev/null; do
+              echo "Database not ready, retrying in 5s..."
+              sleep 5
+            done
+            echo "Database is ready."
+            # Check if wiki tables exist
+            TABLE_COUNT=$(php -r "
+              \$pdo = new PDO('mysql:host='.'$DB_HOST'.';port=$DB_PORT;dbname={{ .Values.mediawiki.db.name }}', getenv('MW_DB_USER') ?: '{{ .Values.mediawiki.db.user }}', getenv('MW_DB_PASSWORD') ?: '{{ .Values.mediawiki.db.password }}');
+              \$stmt = \$pdo->query(\"SHOW TABLES LIKE '{{ .Values.mediawiki.db.prefix }}page'\");
+              echo \$stmt->rowCount();
+            " 2>/dev/null || echo "0")
+            if [ "$TABLE_COUNT" -eq 0 ]; then
+              echo "No tables found. Running MediaWiki install..."
+              php /var/www/html/maintenance/run.php install \
+                --dbserver "$DB_HOST" \
+                --dbname "{{ .Values.mediawiki.db.name }}" \
+                --dbuser "$(printenv MW_DB_USER || echo '{{ .Values.mediawiki.db.user }}')" \
+                --dbpass "$(printenv MW_DB_PASSWORD || echo '{{ .Values.mediawiki.db.password }}')" \
+                --scriptpath "{{ .Values.mediawiki.scriptPath }}" \
+                --lang "{{ .Values.mediawiki.languageCode }}" \
+                --pass "$(openssl rand -base64 32)" \
+                "{{ .Values.mediawiki.sitename }}" "Admin"
+              echo "Install complete."
+            else
+              echo "Tables found. Running MediaWiki update..."
+            fi
+            php /var/www/html/maintenance/run.php update --quick
+            echo "Database is up to date."
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
