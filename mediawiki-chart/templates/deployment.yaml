@@ -47,18 +47,27 @@ spec:
             DB_HOST="{{ .Values.mediawiki.db.server | default (include "mediawiki.mariadb.fullname" .) }}"
             DB_PORT=3306
             echo "Waiting for database at $DB_HOST:$DB_PORT..."
-            until php -r "new PDO('mysql:host='.'$DB_HOST'.';port=$DB_PORT', getenv('MW_DB_USER') ?: '{{ .Values.mediawiki.db.user }}', getenv('MW_DB_PASSWORD') ?: '{{ .Values.mediawiki.db.password }}');" 2>/dev/null; do
+            # Wait for TCP connection to be available
+            until timeout 1 bash -c "cat < /dev/null > /dev/tcp/$DB_HOST/$DB_PORT" 2>/dev/null; do
               echo "Database not ready, retrying in 5s..."
               sleep 5
             done
-            echo "Database is ready."
-            # Check if wiki tables exist
-            TABLE_COUNT=$(php -r "
-              \$pdo = new PDO('mysql:host='.'$DB_HOST'.';port=$DB_PORT;dbname={{ .Values.mediawiki.db.name }}', getenv('MW_DB_USER') ?: '{{ .Values.mediawiki.db.user }}', getenv('MW_DB_PASSWORD') ?: '{{ .Values.mediawiki.db.password }}');
-              \$stmt = \$pdo->query(\"SHOW TABLES LIKE '{{ .Values.mediawiki.db.prefix }}page'\");
-              echo \$stmt->rowCount();
-            " 2>/dev/null || echo "0")
-            if [ "$TABLE_COUNT" -eq 0 ]; then
+            echo "Database TCP port is open."
+
+            # Try to connect and check if tables exist using MediaWiki's PHP with proper autoloading
+            cd /var/www/html
+            TABLE_EXISTS=$(php -r '
+              require_once "includes/WebStart.php";
+              $dbr = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
+              try {
+                $dbr->selectField( "page", "1", "", __METHOD__ );
+                echo "1";
+              } catch (Exception $e) {
+                echo "0";
+              }
+            ' 2>/dev/null || echo "0")
+
+            if [ "$TABLE_EXISTS" -eq 0 ]; then
               echo "No tables found. Running MediaWiki install..."
               php /var/www/html/maintenance/run.php install \
                 --dbserver "$DB_HOST" \
