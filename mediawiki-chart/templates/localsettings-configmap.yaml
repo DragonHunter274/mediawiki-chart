@@ -17,6 +17,12 @@ data:
     $wgServer = getenv('MW_SERVER') ?: {{ .Values.mediawiki.server | quote }};
     $wgResourceBasePath = $wgScriptPath;
 
+    ## Reverse proxy / HTTPS support
+    $wgAssumeProxiesUseDefaultProtocolPorts = true;
+    // Trust all proxies (safe in Kubernetes internal network)
+    $wgUseCdn = true;
+    $wgCdnServersNoPurge = [ '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16' ];
+
     $wgLogos = [
     	'1x' => "$wgResourceBasePath/resources/assets/change-your-logo.svg",
     	'icon' => "$wgResourceBasePath/resources/assets/change-your-logo.svg",
