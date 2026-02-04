@@ -5,11 +5,20 @@ metadata:
   labels:
     {{- include "mediawiki.labels" . | nindent 4 }}
 spec:
+  podSelector:
+    matchLabels:
+      {{- include "mediawiki.networkpolicy" . | nindent 6 }}
+  policyTypes:
+  - Ingress
   ingress:
+  # Allow from other mediawiki pods (for database access)
   - from:
     - podSelector:
         matchLabels:
           {{- include "mediawiki.networkpolicy" . | nindent 10 }}
-  podSelector:
-    matchLabels:
-      {{- include "mediawiki.networkpolicy" . | nindent 6 }}
+  # Allow ingress controller access to mediawiki pods on port 8080
+  - from:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 8080
