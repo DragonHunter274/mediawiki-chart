@@ -35,6 +35,10 @@ spec:
           envFrom:
           - secretRef:
               name: {{ include "mediawiki.fullname" . }}-secret
+          volumeMounts:
+          - mountPath: /tmp/LocalSettings.php
+            name: localsettings
+            subPath: LocalSettings.php
           command:
           - /bin/bash
           - -c
@@ -57,7 +61,13 @@ spec:
 
             # Check if page table exists by attempting to describe it
             if mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "DESCRIBE page;" >/dev/null 2>&1; then
-              echo "Tables found. Skipping install."
+              echo "Tables found. Running update to ensure all extension tables exist..."
+              # Copy LocalSettings.php from temp location so update.php knows about extensions
+              cp /tmp/LocalSettings.php /var/www/html/LocalSettings.php
+              php /var/www/html/maintenance/run.php update --quick
+              # Remove LocalSettings.php as it will be mounted by the main container
+              rm -f /var/www/html/LocalSettings.php
+              echo "Update complete."
             else
               echo "No tables found. Running MediaWiki install..."
               php /var/www/html/maintenance/run.php install \
