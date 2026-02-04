@@ -122,6 +122,9 @@ data:
 
     ## Widgets
     wfLoadExtension( 'Widgets' );
+    
+    ## Visual Editor
+    wfLoadExtension( 'VisualEditor' );
 
     {{- if .Values.mediawiki.extraSettings }}
 
