@@ -122,7 +122,10 @@ data:
 
     ## Widgets
     wfLoadExtension( 'Widgets' );
-    
+
+    ## TemplateStyles
+    wfLoadExtension( 'TemplateStyles' );
+
     ## Visual Editor
     wfLoadExtension( 'VisualEditor' );
 
