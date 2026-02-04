@@ -11,6 +11,8 @@ RUN php composer-setup.php
 RUN php -r "unlink('composer-setup.php');"
 COPY composer.json /var/www/html/composer.json
 RUN php composer.phar update --no-dev
+# Install extension dependencies for OIDC
+RUN cd /var/www/html/extensions/OpenIDConnect && /var/www/html/composer.phar install --no-dev
 RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf && \
     sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
 EXPOSE 8080
