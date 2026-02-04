@@ -35,10 +35,6 @@ spec:
           envFrom:
           - secretRef:
               name: {{ include "mediawiki.fullname" . }}-secret
-          volumeMounts:
-          - mountPath: /var/www/html/LocalSettings.php
-            name: localsettings
-            subPath: LocalSettings.php
           command:
           - /bin/bash
           - -c
@@ -61,8 +57,7 @@ spec:
 
             # Check if page table exists by attempting to describe it
             if mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "DESCRIBE page;" >/dev/null 2>&1; then
-              echo "Tables found. Running MediaWiki update..."
-              php /var/www/html/maintenance/run.php update --quick
+              echo "Tables found. Skipping install."
             else
               echo "No tables found. Running MediaWiki install..."
               php /var/www/html/maintenance/run.php install \
@@ -74,7 +69,8 @@ spec:
                 --lang "{{ .Values.mediawiki.languageCode }}" \
                 --pass "$(openssl rand -base64 32)" \
                 "{{ .Values.mediawiki.sitename }}" "Admin"
-              echo "Install complete."
+              echo "Install complete. Removing generated LocalSettings.php (using ConfigMap version)..."
+              rm -f /var/www/html/LocalSettings.php
             fi
             echo "Database initialization complete."
       containers:
