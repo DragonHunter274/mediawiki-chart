@@ -43,7 +43,6 @@ class SpecialPageCreationWizard extends SpecialPage {
 			->setMethod( 'post' )
 			->setWrapperLegendMsg( 'pagecreationwizard-legend' )
 			->setSubmitTextMsg( 'pagecreationwizard-submit' )
-			->setSubmitProgressive()
 			->setSubmitCallback( function ( array $data ) {
 				return $this->onSubmit( $data );
 			} )
