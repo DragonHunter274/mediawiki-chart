@@ -11,6 +11,7 @@ RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/exte
 RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/Checklists /var/www/html/extensions/Checklists
 RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/CommentStreams /var/www/html/extensions/CommentStreams
 RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/OAuth /var/www/html/extensions/OAuth
+RUN git clone --depth 1 -b REL1_43  https://gerrit.wikimedia.org/r/mediawiki/extensions/SocialProfile /var/www/html/extensions/SocialProfile
 RUN git clone --depth 1 -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/PrivatePageProtection /var/www/html/extensions/PrivatePageProtection
 RUN git clone --depth 1 https://github.com/StarCitizenTools/mediawiki-skins-Citizen.git /var/www/html/skins/Citizen
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
