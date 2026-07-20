@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": ["DragonHunter274"]
+	},
+	"pagecreationwizard-desc": "A simple form to start creating a new wiki page",
+	"pagecreationwizard-title": "Create a New Page",
+	"pagecreationwizard-intro": "Choose where your page should live and enter a title. You will be taken to the editor to write the content.",
+	"pagecreationwizard-legend": "New page",
+	"pagecreationwizard-namespace-label": "Area",
+	"pagecreationwizard-ns-main": "Main wiki (public)",
+	"pagecreationwizard-ns-intern": "Intern (internal)",
+	"pagecreationwizard-pagetitle-label": "Page title",
+	"pagecreationwizard-pagetitle-placeholder": "e.g. Project Overview, Onboarding Guide…",
+	"pagecreationwizard-submit": "Go to editor"
+}

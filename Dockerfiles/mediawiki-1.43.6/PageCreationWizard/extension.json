@@ -1,0 +1,41 @@
+{
+	"name": "PageCreationWizard",
+	"version": "1.0.0",
+	"author": ["DragonHunter274"],
+	"descriptionmsg": "pagecreationwizard-desc",
+	"license-name": "MIT",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.43.0"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\PageCreationWizard\\": "includes/"
+	},
+	"SpecialPages": {
+		"PageCreationWizard": {
+			"class": "MediaWiki\\Extension\\PageCreationWizard\\SpecialPageCreationWizard"
+		}
+	},
+	"MessagesDirs": {
+		"PageCreationWizard": ["i18n"]
+	},
+	"namespaces": [
+		{
+			"id": 3000,
+			"constant": "NS_INTERN",
+			"name": "Intern",
+			"subpages": true,
+			"content": true,
+			"defaultcontentmodel": "wikitext"
+		},
+		{
+			"id": 3001,
+			"constant": "NS_INTERN_TALK",
+			"name": "Intern_talk",
+			"subpages": true,
+			"content": false,
+			"defaultcontentmodel": "wikitext"
+		}
+	],
+	"manifest_version": 2
+}

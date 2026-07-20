@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": ["DragonHunter274"]
+	},
+	"pagecreationwizard-desc": "Extension description shown on Special:Version.",
+	"pagecreationwizard-title": "Title of Special:PageCreationWizard.",
+	"pagecreationwizard-intro": "Introductory paragraph shown above the form.",
+	"pagecreationwizard-legend": "Fieldset legend for the form.",
+	"pagecreationwizard-namespace-label": "Label for the namespace dropdown.",
+	"pagecreationwizard-ns-main": "Option label for the main (public) namespace.",
+	"pagecreationwizard-ns-intern": "Option label for the Intern: namespace.",
+	"pagecreationwizard-pagetitle-label": "Label for the page title text input.",
+	"pagecreationwizard-pagetitle-placeholder": "Placeholder shown inside the title field when empty.",
+	"pagecreationwizard-submit": "Submit button text; clicking it redirects the user to the standard MediaWiki edit page."
+}
