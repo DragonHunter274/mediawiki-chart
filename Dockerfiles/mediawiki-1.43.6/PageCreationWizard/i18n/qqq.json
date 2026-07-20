@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": ["DragonHunter274"]
 	},
+	"pagecreationwizard": "Display name of the special page shown in the page title and navigation. Required by MediaWiki — must match the special page registration name (lowercased).",
 	"pagecreationwizard-desc": "Extension description shown on Special:Version.",
 	"pagecreationwizard-title": "Title of Special:PageCreationWizard.",
 	"pagecreationwizard-intro": "Introductory paragraph shown above the form.",
